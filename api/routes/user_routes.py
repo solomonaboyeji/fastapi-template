@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, Security
 from core.database import get_db
-from schemas.sample import Item
 from schemas.user import ListUsers, User
 from services.user_service import UserService
-from utils.dependencies import has_required_scopes
+from utils.api_utils import raise_or_return
 from utils.scopes import UserScope
 from utils.security import get_current_user
 
@@ -21,10 +20,7 @@ async def list_users(
 
     result = UserService(db, requesting_user=current_user).get_users(offset, page_count)
 
-    if isinstance(result, ListUsers):
-        return result
-    else:
-        raise result
+    return raise_or_return(result, ListUsers)
 
 
 # @router.post("/items/", response_model=Item)

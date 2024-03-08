@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from core.database import get_db
 from schemas.auth import PasswordResetToken, Token
-from schemas.user import User, UserCreate
+from schemas.user import User, UserCreate, UserFromDB
 from services.user_service import UserService
 from utils.security import create_access_token, verify_password
 from psycopg2.extensions import connection as PsycopgConnection
@@ -21,6 +21,7 @@ async def login_for_access_token(
     """Authenticates the user."""
 
     user = authenticate_user(db, form_data.username, form_data.password)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,7 +42,7 @@ def authenticate_user(
     password: str,
 ) -> Union[User, None]:
     user = UserService(db, requesting_user=None).get_user(username)
-    if isinstance(user, User):
+    if isinstance(user, UserFromDB):
         if not verify_password(password, user.hashed_password):
             return None
         return user

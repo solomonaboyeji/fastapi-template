@@ -24,7 +24,7 @@ def get_user_from_db(
 ) -> Union[UserFromDB, Exception]:
     db: PsycopgConnection = db_instance
     cursor = db.cursor()
-    table_fields = list(UserFromDB.__fields__.keys())
+    table_fields = list(UserFromDB.model_fields.keys())
     tables_str = ", ".join(table_fields)
     cursor.execute(
         sql.SQL(f"SELECT {tables_str} FROM users WHERE email = %s"), (email,)
@@ -68,6 +68,7 @@ async def get_current_user(
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+
         username: str = str(payload.get("sub"))
 
         # ignoring this cause it could be altered!
@@ -98,4 +99,5 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    _result = pwd_context.verify(plain_password, hashed_password)
+    return _result

@@ -1,9 +1,17 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from pydantic import BaseModel
 
 
 # Custom OpenAPI schema extension function
+
+
+def raise_or_return(data: BaseModel | Exception, expected_schema):
+    if isinstance(data, expected_schema):
+        return data
+
+    raise data  # type: ignore
 
 
 def add_scopes_to_description(route, key, required_scopes):
